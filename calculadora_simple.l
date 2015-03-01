@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-#include "instrucciones.tab.h"
+#include "calculadora_simple.tab.h"
 %}
 
 separador	([ \t])+

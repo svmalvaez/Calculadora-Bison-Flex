@@ -13,12 +13,13 @@ float toRadians(float grados);
 float varTan(float grados);
 void imprime(float resultado);
 void imprime_invalido();
+void agregar_variable(char var, float val);
 short int valores=1;
 extern FILE * yyin;
 FILE * fsalida;
 
-typedef struct Asignacion {
-        char nombre[20];
+struct Asignacion {
+        char nombre;
         float valor;
         struct Asignacion *siguiente;
         };
@@ -128,6 +129,7 @@ expresion	: TKN_NUM { $$ = $1; }
 			;
 
 %%
+
 int yyerror(char *s)
 {
 	printf("%s\n", s);
@@ -154,7 +156,7 @@ void imprime_invalido()
 	fprintf(fsalida,"Valor indefinido\n");
 }
 
-void agregar_variable(char *var, float val)
+void agregar_variable(char var, float val)
 {
 	struct Asignacion *variable = (struct Asignacion *) malloc (sizeof(struct Asignacion));
 				if (variable == NULL) printf("No hay memoria disponible");
@@ -175,8 +177,8 @@ void agregar_variable(char *var, float val)
 
 int main(int argc, char **argv)
 {
-	primero = (struct _agenda *) NULL;
- 	ultimo = (struct _agenda *) NULL;
+	primero = (struct Asignacion *) NULL;
+ 	ultimo = (struct Asignacion *) NULL;
 
 	if(argc > 2)
 	{
