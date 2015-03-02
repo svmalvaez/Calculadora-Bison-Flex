@@ -13,28 +13,34 @@ float toRadians(float grados);
 float varTan(float grados);
 void imprime(float resultado);
 void imprime_invalido();
-void agregar_variable(char var, float val);
 short int valores=1;
 extern FILE * yyin;
 FILE * fsalida;
+void insertarEnLista(Variable** vCabeza , float valorVar, char* nombreVar);
+Variable* nuevaVariable(float valorVar, char* nombreVar);
+void imprimirVariables();
+Variable* buscarVariable(Variable* cabeza,char* nombreVar);
 
-struct Asignacion {
-        char nombre;
-        float valor;
-        struct Asignacion *siguiente;
-        };
- 
-struct Asignacion *primero, *ultimo;
+typedef struct Elemento {
+	
+	char nombre[25] ; 
+	float valor; 	 
+	struct Elemento* siguiente;
 
+}Variable;
 
+Variable *cabeza
 %}
 
 %union{
 	float real;
+	char cadena[20];
 }
 
 %token <real> TKN_NUM
 %type <real> expresion
+%type <cadena> TKN_ID
+%type <cadena> identificador
 %token TKN_PTOCOMA
 %token TKN_MAS
 %token TKN_MENOS
@@ -49,6 +55,7 @@ struct Asignacion *primero, *ultimo;
 %token TKN_COS
 %token TKN_TAN
 %token TKN_ASIGN
+%token TKN_ID
 %left TKN_ASIGN
 %left TKN_MAS TKN_MENOS TKN_MOD
 %left TKN_MULT TKN_DIV
@@ -74,7 +81,9 @@ calculadora	: expresion TKN_PTOCOMA
 					valores = 1;
 				}
 			}
+			| asignacion TKN_PTOCOMA
 			;
+ 
 
 expresion	: TKN_NUM { $$ = $1; }
 			| TKN_PA expresion TKN_PC { $$ = $2; }
@@ -122,12 +131,24 @@ expresion	: TKN_NUM { $$ = $1; }
 				
 				}
 			}
-			| expresion TKN_ASIGN expresion { 
-			// Agregamos la variable a nuestra lista de asignaciones con su respectivo nombre y valor
-				agregar_variable($1,$3);
+			| identificador {$$ = $1;}
+			;
+
+identificador : TKN_ID {
+				Variable id = buscarVariable(cabeza, $1);
+				if(id != NULL){
+					$$ = id->valor;
+				}
+				else{
+				frprintf(yyout, "Valor del identificador nulo \n");
+				}
 			}
 			;
 
+asignacion : TKN_ID TKN_ASIGN expresion{
+				insertarEnLista(*cabeza, $1, $3);
+			}
+			;
 %%
 
 int yyerror(char *s)
@@ -156,29 +177,48 @@ void imprime_invalido()
 	fprintf(fsalida,"Valor indefinido\n");
 }
 
-void agregar_variable(char var, float val)
-{
-	struct Asignacion *variable = (struct Asignacion *) malloc (sizeof(struct Asignacion));
-				if (variable == NULL) printf("No hay memoria disponible");
-				variable->nombre = var;
-				variable->valor = val;
-				variable->siguiente = NULL;
-
-				if (primero==NULL) {
-		         primero = variable;
-		         ultimo = variable;
-		         }
-		           else {
-	           ultimo->siguiente = variable;
-	           /* hacemos que el nuevo sea ahora el último */
-	           ultimo = variable;
-     			 }	
+void insertarEnLista(Variable** cabeza , float valorVar, char nombreVar[]){
+	Variable *nueva;
+	nueva = nuevaVariable(valorVar,nombreVar);
+	nueva -> siguiente = *cabeza;
+	*cabeza = nueva;
 }
+
+
+Variable* nuevaVariable(float valorVar, char nombreVar[]){
+	Variable *var;
+	var = (Variable*)malloc(sizeof(Variable));
+	//var -> nombre = nombreVar;
+	strcpy( var->nombre, nombreVar );
+	var -> valor = valorVar;
+	var -> siguiente = NULL;
+	printf("\n[vl]Nueva variable: <%s> = %5.2f\n",nombreVar,valorVar);
+	return var;
+}
+
+
+Variable* buscarVariable(Variable* cabeza,char nombreVar[]){
+	int k;
+	Variable *indice;
+	printf("\n[vl]Buscando identificador");
+		for( k = 0 , indice = cabeza; indice; ){
+			if( strcmp( indice->nombre, nombreVar) == 0 )
+  			{
+     			printf("\n[vl]Var Encontrada...\n");
+     			return indice;
+  			}else{
+  				printf(".");
+  				k++;
+				indice = indice->siguiente;
+  			}
+		}
+		return NULL;
+}
+
 
 int main(int argc, char **argv)
 {
-	primero = (struct Asignacion *) NULL;
- 	ultimo = (struct Asignacion *) NULL;
+	cabeza = (struct Variable *) NULL;
 
 	if(argc > 2)
 	{

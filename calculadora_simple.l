@@ -26,6 +26,7 @@ constEntera	{digito}({digito})*
 "("		{ return TKN_PA; }
 ")"		{ return TKN_PC; }
 "="		{return TKN_ASIGN; }
+{identificador} {return TKN_ID; }
 \n	{ }
 .	ECHO;
 %%
