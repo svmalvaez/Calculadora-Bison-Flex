@@ -16,10 +16,6 @@ void imprime_invalido();
 short int valores=1;
 extern FILE * yyin;
 FILE * fsalida;
-void insertarEnLista(Variable** vCabeza , float valorVar, char* nombreVar);
-Variable* nuevaVariable(float valorVar, char* nombreVar);
-void imprimirVariables();
-Variable* buscarVariable(Variable* cabeza,char* nombreVar);
 
 typedef struct Elemento {
 	
@@ -29,18 +25,22 @@ typedef struct Elemento {
 
 }Variable;
 
-Variable *cabeza
+Variable *cabeza;
+void insertarEnLista(Variable** vCabeza , float valorVar, char* nombreVar);
+Variable* nuevaVariable(float valorVar, char* nombreVar);
+void imprimirVariables();
+Variable* buscarVariable(Variable* cabeza,char* nombreVar);
+
 %}
 
 %union{
 	float real;
-	char cadena[20];
+	char *cadena;
 }
 
 %token <real> TKN_NUM
 %type <real> expresion
 %type <cadena> TKN_ID
-%type <cadena> identificador
 %token TKN_PTOCOMA
 %token TKN_MAS
 %token TKN_MENOS
@@ -81,7 +81,11 @@ calculadora	: expresion TKN_PTOCOMA
 					valores = 1;
 				}
 			}
-			| asignacion TKN_PTOCOMA
+			| TKN_ID TKN_ASIGN expresion TKN_PTOCOMA
+			 {
+			 	//dondeGuardas(tkn_id,valor_expresion);
+			 	//BUscar variable y traer el valor, si no existe agregar variable
+			 }
 			;
  
 
@@ -130,25 +134,9 @@ expresion	: TKN_NUM { $$ = $1; }
 					valores = 1;
 				
 				}
-			}
-			| identificador {$$ = $1;}
+			} 
 			;
 
-identificador : TKN_ID {
-				Variable id = buscarVariable(cabeza, $1);
-				if(id != NULL){
-					$$ = id->valor;
-				}
-				else{
-				frprintf(yyout, "Valor del identificador nulo \n");
-				}
-			}
-			;
-
-asignacion : TKN_ID TKN_ASIGN expresion{
-				insertarEnLista(*cabeza, $1, $3);
-			}
-			;
 %%
 
 int yyerror(char *s)

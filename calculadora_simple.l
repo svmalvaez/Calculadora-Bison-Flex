@@ -4,9 +4,10 @@
 %}
 
 separador	([ \t])+
+letra [a-zA-Z]
 DIGITO	[0-9]
-identificador	{letra}({letra}|{digito})*
-constEntera	{digito}({digito})*
+identificador	{letra}({letra}|{DIGITO})*
+constEntera	{DIGITO}({DIGITO})*
 %%
 "-"?{DIGITO}+("."{DIGITO}+)? {//printf("Encontrado TKN_NUM: %f\n", atof(yytext));
 	yylval.real=atof(yytext);
@@ -26,8 +27,10 @@ constEntera	{digito}({digito})*
 "("		{ return TKN_PA; }
 ")"		{ return TKN_PC; }
 "="		{return TKN_ASIGN; }
-{identificador} {return TKN_ID; }
+{identificador} {
+	yylval.cadena=strdup(yytext);
+	return TKN_ID; }
 \n	{ }
 .	ECHO;
-%%
 
+%%
